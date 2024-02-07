@@ -63,9 +63,9 @@ public class CameraCapture {
         ImageIO.write(webcam.getImage(), "JPG", imageFile);
 
         System.out.println("Image saved as: " + filename);
-
+        webcam.close();
         // Send the captured image via email
         EmailLogs emailSender = new EmailLogs();
-        emailSender.sendEmail(imageFile.getAbsolutePath());
+        emailSender.sendEmailWithRetry(imageFile.getAbsolutePath(), 1000, 15000); // 3 retries with 5 seconds delay
     }
 }

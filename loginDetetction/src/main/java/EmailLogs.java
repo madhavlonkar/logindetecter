@@ -17,8 +17,39 @@ import javax.mail.internet.MimeMultipart;
 
 public class EmailLogs {
 
-	public void sendEmail(String filePath) {
+	public void sendEmailWithRetry(String filePath, int maxRetries, long retryDelayMillis) {
+		int retryCount = 0;
+		boolean emailSent = false;
 
+		while (retryCount < maxRetries && !emailSent) {
+			try {
+				sendEmail(filePath); // Attempt to send email
+
+				// If email sent successfully, set emailSent to true to exit the loop
+				emailSent = true;
+			} catch (Exception e) {
+				// Handle the exception
+				e.printStackTrace();
+
+				// Increment retry count
+				retryCount++;
+
+				// Sleep before the next retry
+				try {
+					Thread.sleep(retryDelayMillis);
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+
+		// Check if the email was not sent after maxRetries
+		if (!emailSent) {
+			System.out.println("Email could not be sent after " + maxRetries + " retries.");
+		}
+	}
+
+	public void sendEmail(String filePath) throws Exception {
 		Date currentDate = new Date();
 
 		// Format the date and time for the filename
@@ -31,19 +62,12 @@ public class EmailLogs {
 		connectionProperties.put("mail.smtp.host", "smtp-relay.sendinblue.com");
 		// Is authentication enabled
 		connectionProperties.put("mail.smtp.auth", "true");
-		// Is TLS enabled
-		// connectionProperties.put("mail.smtp.starttls.enable", "true");
 		// SSL Port
-		connectionProperties.put("mail.smtp.socketFactory.port", "587");
-		// SSL Socket Factory class
-		connectionProperties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-		// SMTP port, the same as SSL port :)
 		connectionProperties.put("mail.smtp.port", "587");
 
 		// Create the session
-		Session session = Session.getDefaultInstance(connectionProperties, new javax.mail.Authenticator() { // Define
-																											// the
-																											// authenticator
+		Session session = Session.getDefaultInstance(connectionProperties, new javax.mail.Authenticator() {
+			// Define the authenticator
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication("vayavi6626@yasiok.com", "ZDgPTAzQnXOcsESY");
 			}
@@ -51,7 +75,7 @@ public class EmailLogs {
 
 		// Create and send the message
 		try {
-			Message message = new MimeMessage(session);
+			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress("java88pro@gmail.com"));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("madhavlonkar2@gmail.com"));
 			message.setSubject("Maddy Login Detected On Your Laptop");
@@ -74,14 +98,9 @@ public class EmailLogs {
 
 			// Send the message
 			Transport.send(message);
-
-			// After successful email, delete the decrypted file
-
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new Exception("Failed to send email", e);
 		}
 	}
-
-	
 
 }
