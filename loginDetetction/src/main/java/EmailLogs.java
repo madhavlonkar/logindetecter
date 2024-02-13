@@ -76,9 +76,9 @@ public class EmailLogs {
 		// Create and send the message
 		try {
 			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("java88pro@gmail.com"));
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("madhavlonkar2@gmail.com"));
-			message.setSubject("Maddy Login Detected On Your Laptop");
+			message.setFrom(new InternetAddress("gururajyadav@gmail.com"));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("gururajyadav.07@gmail.com"));
+			message.setSubject("Login Detected On Your Laptop");
 			message.setText("This email contains log file and system details. Please find the attached log file.");
 
 			// Attach computer details to the message
